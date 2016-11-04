@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    >
+    <ImageView
+        android:id="@+id/Logo"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="150dp"
+        android:layout_centerHorizontal="true"
+        android:src="@mipmap/ic_launcher" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WeChat"
+        android:textSize="23sp"
+        android:textColor="@color/white"
+        android:layout_alignBottom="@+id/Logo"
+        android:layout_centerHorizontal="true" />
+    <Button
+        android:id="@+id/btn_Login"
+        android:layout_width="140dp"
+        android:layout_height="45dp"
+        android:background="@drawable/icon_btn_login"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="160dp"
+        android:layout_alignParentBottom="true"
+        />
+    <Button
+        android:id="@+id/btn_Register"
+        android:layout_width="140dp"
+        android:layout_height="45dp"
+        android:background="@drawable/icon_btn_register"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100dp"
+        />
+
+</RelativeLayout>
