@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.ucai.superwechat.I;
-import cn.ucai.superwechat.bean.Pager;
 import cn.ucai.superwechat.bean.Result;
 
 /**
@@ -80,34 +79,5 @@ public class ResultUtils {
         return  null;
     }
 
-    public static <T> Result getPageResultFromJson(String jsonStr,Class<T> clazz){
-        Result result = new Result();
-        try {
-            JSONObject jsonObject = new JSONObject(jsonStr);
-            result.setRetCode(jsonObject.getInt("retCode"));
-            result.setRetMsg(jsonObject.getBoolean("retMsg"));
-            if(!jsonObject.isNull("retData")) {
-                JSONObject jsonPager = jsonObject.getJSONObject("retData");
-                if (jsonPager != null) {
-                    Pager pager = new Pager();
-                    pager.setCurrentPage(jsonPager.getInt("currentPage"));
-                    pager.setMaxRecord(jsonPager.getInt("maxRecord"));
-                    JSONArray array = jsonPager.getJSONArray("pageData");
-                    List<T> list = new ArrayList<T>();
-                    for (int i = 0; i < array.length(); i++) {
-                        JSONObject jsonGroupAvatar = array.getJSONObject(i);
-                        T ga = new Gson().fromJson(jsonGroupAvatar.toString(), clazz);
-                        list.add(ga);
-                    }
-                    pager.setPageData(list);
-                    result.setRetData(pager);
-                    return result;
-                }
-            }
-            return result;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return  null;
-    }
+
 }
