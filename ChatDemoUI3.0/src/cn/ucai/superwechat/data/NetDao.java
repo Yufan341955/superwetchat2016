@@ -27,7 +27,7 @@ public class NetDao {
     }
     public static void unregister(Context context, String username,OkHttpUtils.OnCompleteListener<Result> listener){
         OkHttpUtils<Result> utils=new OkHttpUtils<Result>(context);
-        utils.setRequestUrl(I.REQUEST_REGISTER)
+        utils.setRequestUrl(I.REQUEST_UNREGISTER)
                 .addParam(I.User.USER_NAME,username)
                 .targetClass(Result.class)
                 .execute(listener);
