@@ -25,12 +25,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,10 +46,14 @@ import com.hyphenate.chat.EMMessage;
 import cn.ucai.superwechat.Constant;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.adapter.MainTabAdpter;
 import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
 import cn.ucai.superwechat.runtimepermissions.PermissionsManager;
 import cn.ucai.superwechat.runtimepermissions.PermissionsResultAction;
+import cn.ucai.superwechat.widget.DMTabHost;
+import cn.ucai.superwechat.widget.MFViewPager;
+
 import com.hyphenate.easeui.utils.EaseCommonUtils;
 import com.hyphenate.util.EMLog;
 import com.umeng.analytics.MobclickAgent;
@@ -59,9 +62,9 @@ import com.umeng.update.UmengUpdateAgent;
 import java.util.List;
 
 @SuppressLint("NewApi")
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedChangeListener,MFViewPager.OnPageChangeListener{
 
-//	protected static final String TAG = "MainActivity";
+  protected static final String TAG = "MainActivity";
 //	// textview for unread message count
 //	private TextView unreadLabel;
 //	// textview for unread event message
@@ -76,8 +79,11 @@ public class MainActivity extends BaseActivity {
 	public boolean isConflict = false;
 	// user account was removed
 	private boolean isCurrentAccountRemoved = false;
-	
-
+	private TextView mtvLeft;
+	private ImageView mImgRight;
+	private MFViewPager mViewPager;
+    private DMTabHost mTabHost;
+	private MainTabAdpter mAdapter;
 	/**
 	 * check if current user account was remove
 	 */
@@ -96,7 +102,7 @@ public class MainActivity extends BaseActivity {
 		initView();
 		umeng();
         checkedAccount();
-
+        setListener();
 		inviteMessgeDao = new InviteMessgeDao(this);
 		UserDao userDao = new UserDao(this);
 //		conversationListFragment = new ConversationListFragment();
@@ -115,6 +121,11 @@ public class MainActivity extends BaseActivity {
 		EMClient.getInstance().contactManager().setContactListener(new MyContactListener());
 		//debug purpose only
         registerInternalDebugReceiver();
+	}
+
+	private void setListener() {
+		mViewPager.setOnPageChangeListener(this);
+		mTabHost.setOnCheckedChangeListener(this);
 	}
 
 	private void checkedAccount() {
@@ -186,6 +197,23 @@ public class MainActivity extends BaseActivity {
 //		mTabs[2] = (Button) findViewById(R.id.btn_setting);
 //		// select first tab
 //		mTabs[0].setSelected(true);
+		mtvLeft= (TextView) findViewById(R.id.txt_left);
+		mImgRight= (ImageView) findViewById(R.id.img_right);
+		mViewPager= (MFViewPager) findViewById(R.id.ViewPager);
+		mTabHost= (DMTabHost) findViewById(R.id.TabHost);
+		mtvLeft.setVisibility(View.VISIBLE);
+		mImgRight.setVisibility(View.VISIBLE);
+		mAdapter=new MainTabAdpter(getSupportFragmentManager());
+		mViewPager.setAdapter(mAdapter);
+		mViewPager.setOffscreenPageLimit(4);
+		mAdapter.clear();
+		mAdapter.addFragment(new ConversationListFragment(),getString(R.string.app_name));
+		mAdapter.addFragment(new ContactListFragment(),getString(R.string.contacts));
+		mAdapter.addFragment(new DiscoverFragment(),getString(R.string.discover));
+		mAdapter.addFragment(new SettingsFragment(),getString(R.string.me));
+		mAdapter.notifyDataSetChanged();
+		mTabHost.setChecked(0);
+
 	}
 
 	/**
@@ -315,7 +343,28 @@ public class MainActivity extends BaseActivity {
         };
         broadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
-	
+
+	@Override
+	public void onCheckedChange(int checkedPosition, boolean byUser) {
+		mViewPager.setCurrentItem(checkedPosition,false);
+
+	}
+
+	@Override
+	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+	}
+
+	@Override
+	public void onPageSelected(int position) {
+		mTabHost.setChecked(position);
+	}
+
+	@Override
+	public void onPageScrollStateChanged(int state) {
+
+	}
+
 	public class MyContactListener implements EMContactListener {
         @Override
         public void onContactAdded(String username) {}
@@ -502,7 +551,7 @@ public class MainActivity extends BaseActivity {
 				conflictBuilder.create().show();
 				isConflict = true;
 			} catch (Exception e) {
-				//EMLog.e(TAG, "---------color conflictBuilder error" + e.getMessage());
+				EMLog.e(TAG, "---------color conflictBuilder error" + e.getMessage());
 			}
 
 		}
@@ -537,7 +586,7 @@ public class MainActivity extends BaseActivity {
 				accountRemovedBuilder.create().show();
 				isCurrentAccountRemoved = true;
 			} catch (Exception e) {
-				//EMLog.e(TAG, "---------color userRemovedBuilder error" + e.getMessage());
+				EMLog.e(TAG, "---------color userRemovedBuilder error" + e.getMessage());
 			}
 
 		}

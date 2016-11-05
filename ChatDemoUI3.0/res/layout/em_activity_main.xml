@@ -7,10 +7,12 @@
     android:background="@color/common_bg">
     <include android:id="@+id/title" layout="@layout/view_layout_title"/>
     <cn.ucai.superwechat.widget.MFViewPager
-        android:id="@+id/viewPager"
+        android:id="@+id/ViewPager"
         android:layout_below="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="48dp"
+        >
     </cn.ucai.superwechat.widget.MFViewPager>
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,6 +26,7 @@
             android:background="#D6DCDC"
             />
         <cn.ucai.superwechat.widget.DMTabHost
+            android:id="@+id/TabHost"
             android:layout_width="match_parent"
             android:layout_height="47dp">
             <cn.ucai.superwechat.widget.DMTabButton
