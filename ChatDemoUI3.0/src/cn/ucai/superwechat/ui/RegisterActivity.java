@@ -20,6 +20,7 @@ import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.bean.Result;
 import cn.ucai.superwechat.data.NetDao;
 import cn.ucai.superwechat.data.OkHttpUtils;
+import cn.ucai.superwechat.utils.MFGT;
 
 import com.hyphenate.exceptions.HyphenateException;
 
@@ -60,6 +61,19 @@ public class RegisterActivity extends BaseActivity {
 		mIvBack= (ImageView) findViewById(R.id.img_back);
 		mTvTitle= (TextView) findViewById(R.id.txt_title);
         mContext=RegisterActivity.this;
+		initView();
+	}
+
+	private void initView() {
+		mIvBack.setVisibility(View.VISIBLE);
+		mTvTitle.setVisibility(View.VISIBLE);
+		mTvTitle.setText(R.string.register);
+		mIvBack.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				MFGT.finish(RegisterActivity.this);
+			}
+		});
 	}
 
 	public void register(View view) {
@@ -176,7 +190,7 @@ public class RegisterActivity extends BaseActivity {
 	}
 
 	public void back(View view) {
-		finish();
+		MFGT.finish(this);
 	}
 
 }
