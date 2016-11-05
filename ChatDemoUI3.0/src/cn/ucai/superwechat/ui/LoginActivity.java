@@ -56,8 +56,6 @@ public class LoginActivity extends BaseActivity {
 	public static final int REQUEST_CODE_SETNICK = 1;
 	private EditText mEtUserName;
 	private EditText mEtPassWord;
-	private EditText mEtconfirmPwd;
-	private EditText mEtNick;
 	private ImageView mIvBack;
 	private TextView mTvTitle;
 	Context mContext;
@@ -81,8 +79,6 @@ public class LoginActivity extends BaseActivity {
 		mContext=this;
 		mEtUserName = (EditText) findViewById(R.id.et_username);
 		mEtPassWord = (EditText) findViewById(R.id.et_password);
-		mEtNick= (EditText) findViewById(R.id.et_nick);
-		mEtconfirmPwd = (EditText) findViewById(R.id.et_confirm_password);
 		mIvBack= (ImageView) findViewById(R.id.img_back);
 		mTvTitle= (TextView) findViewById(R.id.txt_title);
 		setListener();
@@ -280,6 +276,9 @@ public class LoginActivity extends BaseActivity {
 		super.onResume();
 		if (autoLogin) {
 			return;
+		}
+		if(SuperWeChatHelper.getInstance().getCurrentUsernName()!=null){
+			mEtUserName.setText(SuperWeChatHelper.getInstance().getCurrentUsernName());
 		}
 	}
 }
