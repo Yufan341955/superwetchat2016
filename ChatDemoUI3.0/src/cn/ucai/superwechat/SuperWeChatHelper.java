@@ -26,6 +26,7 @@ import com.hyphenate.chat.EMMessage.Type;
 import com.hyphenate.chat.EMOptions;
 import com.hyphenate.chat.EMTextMessageBody;
 
+import cn.ucai.superwechat.bean.User;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
 import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
@@ -84,14 +85,27 @@ public class SuperWeChatHelper {
 
 	private Map<String, EaseUser> contactList;
 
-	private Map<String, RobotUser> robotList;
+    public User getCurrentUser() {
+        if(CurrentUser==null){
+            String username=EMClient.getInstance().getCurrentUser();
+            CurrentUser=new User(username);
+        }
+        return CurrentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        CurrentUser = user;
+    }
+
+    private Map<String, RobotUser> robotList;
 
 	private UserProfileManager userProManager;
 
 	private static SuperWeChatHelper instance = null;
 	
 	private SuperWeChatModel demoModel = null;
-	
+
+    private User CurrentUser=null;
 	/**
      * sync groups status listener
      */

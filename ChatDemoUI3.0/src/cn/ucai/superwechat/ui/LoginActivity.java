@@ -14,6 +14,7 @@
 package cn.ucai.superwechat.ui;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -28,15 +29,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatApplication;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.bean.User;
 import cn.ucai.superwechat.data.NetDao;
 import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
+import cn.ucai.superwechat.db.UserDao;
 import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.MD5;
 import cn.ucai.superwechat.utils.MFGT;
@@ -56,7 +60,7 @@ public class LoginActivity extends BaseActivity {
 	private EditText mEtNick;
 	private ImageView mIvBack;
 	private TextView mTvTitle;
-	LoginActivity mContext;
+	Context mContext;
 	private boolean progressShow;
 	private boolean autoLogin = false;
 	ProgressDialog pd=null;
@@ -74,7 +78,7 @@ public class LoginActivity extends BaseActivity {
 			return;
 		}
 		setContentView(R.layout.em_activity_login);
-		mContext=LoginActivity.this;
+		mContext=this;
 		mEtUserName = (EditText) findViewById(R.id.et_username);
 		mEtPassWord = (EditText) findViewById(R.id.et_password);
 		mEtNick= (EditText) findViewById(R.id.et_nick);
@@ -100,7 +104,7 @@ public class LoginActivity extends BaseActivity {
 		mIvBack.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				MFGT.finish(mContext);
+				MFGT.finish(LoginActivity.this);
 			}
 		});
 		// if user changed, clear the password
@@ -207,8 +211,24 @@ public class LoginActivity extends BaseActivity {
 			@Override
 			public void onSuccess(Result result) {
 				L.e(TAG,"result="+result.toString());
-				pd.dismiss();
-				loginEMSuccess();
+				if(result!=null&&result.isRetMsg()){
+					String json=result.getRetData().toString();
+					Gson gson=new Gson();
+					User user= gson.fromJson(json,User.class);
+					L.e(TAG,"user="+user.toString());
+					if(user!=null) {
+						UserDao dao = new UserDao(mContext);
+						dao.savaUser(user);
+						SuperWeChatHelper.getInstance().setCurrentUser(user);
+						loginEMSuccess();
+					}else{
+						pd.dismiss();
+					}
+
+				}else {
+					pd.dismiss();
+				}
+
 			}
 
 			@Override
@@ -252,7 +272,7 @@ public class LoginActivity extends BaseActivity {
 	 * @param view
 	 */
 	public void register(View view) {
-		MFGT.gotoRegister(mContext);
+		MFGT.gotoRegister(LoginActivity.this);
 	}
 
 	@Override

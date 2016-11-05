@@ -18,6 +18,7 @@ import java.util.Map;
 
 import android.content.Context;
 
+import cn.ucai.superwechat.bean.User;
 import cn.ucai.superwechat.domain.RobotUser;
 import com.hyphenate.easeui.domain.EaseUser;
 
@@ -35,6 +36,15 @@ public class UserDao {
 	public static final String ROBOT_COLUMN_NAME_ID = "username";
 	public static final String ROBOT_COLUMN_NAME_NICK = "nick";
 	public static final String ROBOT_COLUMN_NAME_AVATAR = "avatar";
+
+	static final String USER_TABLE_NAME="t_superwechat_user";
+	static final String USER_NAME="m_user_name";
+	static final String USER_NICK="m_user_nick";
+	static final String USER_AVATAR_ID="m_user_avatar_id";
+	static final String USER_AVATAR_PATH="m_user_avatar_path";
+	static final String USER_AVATAR_SUFFIX="m_user_avatar_suffix";
+	static final String USER_AVATAR_TYPE="m_user_avatar_type";
+	static final String USER_AVATAR_LASTUPDATE_TIME="m_user_avatar_lastupdate_time";
 	
 	
 	public UserDao(Context context) {
@@ -98,4 +108,14 @@ public class UserDao {
     public void saveRobotUser(List<RobotUser> robotList){
     	SuperWeChatDBManager.getInstance().saveRobotList(robotList);
     }
+	public boolean savaUser(User user){
+		return SuperWeChatDBManager.getInstance().savaUser(user);
+	}
+
+	public  User getUser(String username){
+		return SuperWeChatDBManager.getInstance().getUser(username);
+	}
+	public boolean updateUser(User user){
+		return SuperWeChatDBManager.getInstance().updateUser(user);
+	}
 }
