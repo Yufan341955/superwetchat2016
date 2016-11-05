@@ -6,19 +6,23 @@ import android.os.Bundle;
 import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.bean.User;
+import cn.ucai.superwechat.db.UserDao;
+import cn.ucai.superwechat.utils.L;
 
 /**
  * 开屏页
  *
  */
 public class SplashActivity extends BaseActivity {
-
+    private static final String TAG=SplashActivity.class.getSimpleName();
 	private static final int sleepTime = 2000;
-
+	SplashActivity mContext;
 	@Override
 	protected void onCreate(Bundle arg0) {
 		setContentView(R.layout.em_activity_splash);
 		super.onCreate(arg0);
+		mContext=this;
 
 	}
 
@@ -33,6 +37,10 @@ public class SplashActivity extends BaseActivity {
 					long start = System.currentTimeMillis();
 					EMClient.getInstance().groupManager().loadAllGroups();
 					EMClient.getInstance().chatManager().loadAllConversations();
+					UserDao dao=new UserDao(mContext);
+					User user = dao.getUser(EMClient.getInstance().getCurrentUser());
+					L.e(TAG,"user="+user.toString());
+					SuperWeChatHelper.getInstance().setCurrentUser(user);
 					long costTime = System.currentTimeMillis() - start;
 					//wait
 					if (sleepTime - costTime > 0) {
