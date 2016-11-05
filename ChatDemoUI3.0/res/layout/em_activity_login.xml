@@ -80,7 +80,7 @@
             android:layout_height="43dp"
             android:layout_marginTop="40dp"
             android:background="@drawable/btn_enable_green"
-            android:onClick="register"
+            android:onClick="login"
             android:enabled="true"
             android:text="@string/login_btn_action"
             android:textColor="@android:color/white"
@@ -102,7 +102,9 @@
             android:layout_centerHorizontal="true"
             android:onClick="register"
             android:text="@string/login_btn_register"
-            android:background="#FFF"
+            android:background="#F0F0F0"
+            android:textColor="@color/text_hint"
             android:layout_marginBottom="30dp"
+
             />
 </RelativeLayout>
