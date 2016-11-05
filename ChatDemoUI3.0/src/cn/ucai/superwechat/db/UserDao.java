@@ -17,10 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
-
-import cn.ucai.superwechat.bean.User;
 import cn.ucai.superwechat.domain.RobotUser;
 import com.hyphenate.easeui.domain.EaseUser;
+import com.hyphenate.easeui.domain.User;
 
 public class UserDao {
 	public static final String TABLE_NAME = "uers";
@@ -45,8 +44,9 @@ public class UserDao {
 	static final String USER_AVATAR_SUFFIX="m_user_avatar_suffix";
 	static final String USER_AVATAR_TYPE="m_user_avatar_type";
 	static final String USER_AVATAR_LASTUPDATE_TIME="m_user_avatar_lastupdate_time";
-	
-	
+	private Map<String, EaseUser> appContactList;
+
+
 	public UserDao(Context context) {
 	}
 
@@ -117,5 +117,21 @@ public class UserDao {
 	}
 	public boolean updateUser(User user){
 		return SuperWeChatDBManager.getInstance().updateUser(user);
+	}
+
+
+	public void saveAppContactList(List<User> contactList) {
+		SuperWeChatDBManager.getInstance().saveAppContactList(contactList);
+	}
+
+	public Map<String, User> getAppContactList() {
+		return SuperWeChatDBManager.getInstance().getAppContactList();
+	}
+	/**
+	 * save a contact
+	 * @param user
+	 */
+	public void saveAppContact(User user) {
+		SuperWeChatDBManager.getInstance().saveAppContact(user);
 	}
 }

@@ -36,7 +36,6 @@ import cn.ucai.superwechat.SuperWeChatApplication;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.bean.Result;
-import cn.ucai.superwechat.bean.User;
 import cn.ucai.superwechat.data.NetDao;
 import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
@@ -45,6 +44,7 @@ import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.MD5;
 import cn.ucai.superwechat.utils.MFGT;
 
+import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.utils.EaseCommonUtils;
 
 /**

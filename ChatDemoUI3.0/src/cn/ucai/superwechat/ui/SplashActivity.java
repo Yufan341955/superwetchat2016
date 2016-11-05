@@ -4,9 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.easeui.domain.User;
+
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
-import cn.ucai.superwechat.bean.User;
 import cn.ucai.superwechat.db.UserDao;
 import cn.ucai.superwechat.utils.L;
 

@@ -1,7 +1,8 @@
-package cn.ucai.superwechat.bean;
+package com.hyphenate.easeui.domain;
+
+import com.hyphenate.easeui.utils.EaseCommonUtils;
 
 import java.io.Serializable;
-
 
 
 public class User implements Serializable {
@@ -17,7 +18,8 @@ public class User implements Serializable {
 	 * initial letter for nickname
 	 */
 	protected String initialLetter;
-	
+	private String avatar;
+
 	public User() {
 		super();
 	}
@@ -110,5 +112,22 @@ public class User implements Serializable {
 		return "UserAvatar [muserName=" + muserName + ", muserNick=" + muserNick + ", mavatarId=" + mavatarId
 				+ ", mavatarPath=" + mavatarPath + ", mavatarSuffix=" + mavatarSuffix + ", mavatarType=" + mavatarType
 				+ ", mavatarLastUpdateTime=" + mavatarLastUpdateTime + "]";
+	}
+
+	public String getInitialLetter() {
+		if(initialLetter == null){
+			EaseCommonUtils.setAppUserInitialLetter(this);
+		}
+		return initialLetter;
+	}
+
+	public void setInitialLetter(String initialLetter) {
+		this.initialLetter = initialLetter;
+	}
+
+	public String getAvatar() {
+		String path=""+getMUserName();
+
+		return avatar;
 	}
 }
