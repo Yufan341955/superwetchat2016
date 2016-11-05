@@ -17,13 +17,20 @@ import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
+
 import com.hyphenate.exceptions.HyphenateException;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -31,34 +38,52 @@ import android.widget.Toast;
  * 
  */
 public class RegisterActivity extends BaseActivity {
-	private EditText userNameEditText;
-	private EditText passwordEditText;
-	private EditText confirmPwdEditText;
-
+	private EditText mEtUserName;
+	private EditText mEtPassWord;
+	private EditText mEtconfirmPwd;
+	private EditText mEtNick;
+	private ImageView mIvBack;
+    private TextView mTvTitle;
+	Context mContext;
+	ProgressDialog pd=null;
+	String username;
+	String nickname;
+	String pwd;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.em_activity_register);
-		userNameEditText = (EditText) findViewById(R.id.username);
-		passwordEditText = (EditText) findViewById(R.id.password);
-		confirmPwdEditText = (EditText) findViewById(R.id.confirm_password);
+		mEtUserName = (EditText) findViewById(R.id.et_username);
+		mEtPassWord = (EditText) findViewById(R.id.et_password);
+		mEtNick= (EditText) findViewById(R.id.et_nick);
+		mEtconfirmPwd = (EditText) findViewById(R.id.et_confirm_password);
+		mIvBack= (ImageView) findViewById(R.id.img_back);
+		mTvTitle= (TextView) findViewById(R.id.txt_title);
+        mContext=RegisterActivity.this;
 	}
 
 	public void register(View view) {
-		final String username = userNameEditText.getText().toString().trim();
-		final String pwd = passwordEditText.getText().toString().trim();
-		String confirm_pwd = confirmPwdEditText.getText().toString().trim();
+		username = mEtUserName.getText().toString().trim();
+		nickname=mEtNick.getText().toString().trim();
+		pwd = mEtPassWord.getText().toString().trim();
+		String confirm_pwd = mEtconfirmPwd.getText().toString().trim();
 		if (TextUtils.isEmpty(username)) {
 			Toast.makeText(this, getResources().getString(R.string.User_name_cannot_be_empty), Toast.LENGTH_SHORT).show();
-			userNameEditText.requestFocus();
+			mEtUserName.requestFocus();
 			return;
-		} else if (TextUtils.isEmpty(pwd)) {
+		}else if(TextUtils.isEmpty(nickname)){
+			Toast.makeText(this, getResources().getString(R.string.Nick_cannot_be_empty), Toast.LENGTH_SHORT).show();
+			mEtNick.requestFocus();
+			return;
+		}
+
+		else if (TextUtils.isEmpty(pwd)) {
 			Toast.makeText(this, getResources().getString(R.string.Password_cannot_be_empty), Toast.LENGTH_SHORT).show();
-			passwordEditText.requestFocus();
+			mEtPassWord.requestFocus();
 			return;
 		} else if (TextUtils.isEmpty(confirm_pwd)) {
 			Toast.makeText(this, getResources().getString(R.string.Confirm_password_cannot_be_empty), Toast.LENGTH_SHORT).show();
-			confirmPwdEditText.requestFocus();
+			mEtconfirmPwd.requestFocus();
 			return;
 		} else if (!pwd.equals(confirm_pwd)) {
 			Toast.makeText(this, getResources().getString(R.string.Two_input_password), Toast.LENGTH_SHORT).show();
@@ -66,49 +91,88 @@ public class RegisterActivity extends BaseActivity {
 		}
 
 		if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(pwd)) {
-			final ProgressDialog pd = new ProgressDialog(this);
+			pd = new ProgressDialog(this);
 			pd.setMessage(getResources().getString(R.string.Is_the_registered));
 			pd.show();
+			registerAppServer();
 
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						// call method in SDK
-						EMClient.getInstance().createAccount(username, pwd);
-						runOnUiThread(new Runnable() {
-							public void run() {
-								if (!RegisterActivity.this.isFinishing())
-									pd.dismiss();
-								// save current user
-								SuperWeChatHelper.getInstance().setCurrentUserName(username);
-								Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registered_successfully), Toast.LENGTH_SHORT).show();
-								finish();
-							}
-						});
-					} catch (final HyphenateException e) {
-						runOnUiThread(new Runnable() {
-							public void run() {
-								if (!RegisterActivity.this.isFinishing())
-									pd.dismiss();
-								int errorCode=e.getErrorCode();
-								if(errorCode==EMError.NETWORK_ERROR){
-									Toast.makeText(getApplicationContext(), getResources().getString(R.string.network_anomalies), Toast.LENGTH_SHORT).show();
-								}else if(errorCode == EMError.USER_ALREADY_EXIST){
-									Toast.makeText(getApplicationContext(), getResources().getString(R.string.User_already_exists), Toast.LENGTH_SHORT).show();
-								}else if(errorCode == EMError.USER_AUTHENTICATION_FAILED){
-									Toast.makeText(getApplicationContext(), getResources().getString(R.string.registration_failed_without_permission), Toast.LENGTH_SHORT).show();
-								}else if(errorCode == EMError.USER_ILLEGAL_ARGUMENT){
-								    Toast.makeText(getApplicationContext(), getResources().getString(R.string.illegal_user_name),Toast.LENGTH_SHORT).show();
-								}else{
-									Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registration_failed), Toast.LENGTH_SHORT).show();
-								}
-							}
-						});
-					}
-				}
-			}).start();
+
 
 		}
+	}
+
+	private void registerAppServer() {
+		NetDao.register(mContext, username, nickname, pwd, new OkHttpUtils.OnCompleteListener<Result>() {
+			@Override
+			public void onSuccess(Result result) {
+				if(result!=null&&result.isRetMsg()){
+					registerEMServer();
+				}else {
+                     unregisterAppServer();
+				}
+			}
+
+			@Override
+			public void onError(String error) {
+              pd.dismiss();
+			}
+		});
+
+	}
+
+	private void unregisterAppServer() {
+         NetDao.unregister(mContext, username, new OkHttpUtils.OnCompleteListener<Result>() {
+			 @Override
+			 public void onSuccess(Result result) {
+				 pd.dismiss();
+			 }
+
+			 @Override
+			 public void onError(String error) {
+                 pd.dismiss();
+			 }
+		 });
+	}
+
+	private void registerEMServer() {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					// call method in SDK
+					EMClient.getInstance().createAccount(username, pwd);
+					runOnUiThread(new Runnable() {
+						public void run() {
+							if (!RegisterActivity.this.isFinishing())
+								pd.dismiss();
+							// save current user
+							SuperWeChatHelper.getInstance().setCurrentUserName(username);
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registered_successfully), Toast.LENGTH_SHORT).show();
+							finish();
+						}
+					});
+				} catch (final HyphenateException e) {
+					unregisterAppServer();
+					runOnUiThread(new Runnable() {
+						public void run() {
+							if (!RegisterActivity.this.isFinishing())
+								pd.dismiss();
+							int errorCode=e.getErrorCode();
+							if(errorCode==EMError.NETWORK_ERROR){
+								Toast.makeText(getApplicationContext(), getResources().getString(R.string.network_anomalies), Toast.LENGTH_SHORT).show();
+							}else if(errorCode == EMError.USER_ALREADY_EXIST){
+								Toast.makeText(getApplicationContext(), getResources().getString(R.string.User_already_exists), Toast.LENGTH_SHORT).show();
+							}else if(errorCode == EMError.USER_AUTHENTICATION_FAILED){
+								Toast.makeText(getApplicationContext(), getResources().getString(R.string.registration_failed_without_permission), Toast.LENGTH_SHORT).show();
+							}else if(errorCode == EMError.USER_ILLEGAL_ARGUMENT){
+								Toast.makeText(getApplicationContext(), getResources().getString(R.string.illegal_user_name),Toast.LENGTH_SHORT).show();
+							}else{
+								Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registration_failed), Toast.LENGTH_SHORT).show();
+							}
+						}
+					});
+				}
+			}
+		}).start();
 	}
 
 	public void back(View view) {
