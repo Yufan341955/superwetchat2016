@@ -73,6 +73,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
                 MFGT.gotoSettingsActivity(getActivity());
             break;
             case R.id.layout_profile:
+                MFGT.gotoUserProfileActivity(getActivity());
             break;
         }
     }

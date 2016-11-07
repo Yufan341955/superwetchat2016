@@ -288,6 +288,10 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 			public void onSuccess(Result result) {
 				L.e(TAG,"result="+result);
 				if(result!=null&&result.isRetMsg()){
+				    Gson gson=new Gson();
+					String json=result.getRetData().toString();
+					User u=gson.fromJson(json,User.class);
+					SuperWeChatHelper.getInstance().saveAppContact(u);
 					setPicToView(picData);
 					dialog.dismiss();
 				}else {
@@ -330,7 +334,10 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 			Bitmap photo = extras.getParcelable("data");
 			Drawable drawable = new BitmapDrawable(getResources(), photo);
 			mImgAvatar.setImageDrawable(drawable);
-			uploadUserAvatar(Bitmap2Bytes(photo));
+			dialog.dismiss();
+			Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_success),
+					Toast.LENGTH_SHORT).show();
+			//uploadUserAvatar(Bitmap2Bytes(photo));
 		}
 
 	}
