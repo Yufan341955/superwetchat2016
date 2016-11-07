@@ -15,6 +15,7 @@ import com.hyphenate.easeui.utils.EaseUserUtils;
 
 import cn.ucai.superwechat.Constant;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.utils.MFGT;
 
 /**
  * Created by Administrator on 2016/11/5.
@@ -69,6 +70,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
             break;
             //end packet code
             case R.id.profile_setting:
+                MFGT.gotoSettingsActivity(getActivity());
             break;
             case R.id.layout_profile:
             break;
