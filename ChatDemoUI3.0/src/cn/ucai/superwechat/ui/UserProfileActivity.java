@@ -1,12 +1,19 @@
 package cn.ucai.superwechat.ui;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import com.alipay.security.mobile.module.commonutils.CommonUtils;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
+
+import cn.ucai.superwechat.I;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.bean.Result;
@@ -18,6 +25,7 @@ import cn.ucai.superwechat.utils.ResultUtils;
 
 import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.domain.User;
+import com.hyphenate.easeui.utils.EaseImageUtils;
 import com.hyphenate.easeui.utils.EaseSmileUtils;
 import com.hyphenate.easeui.utils.EaseUserUtils;
 
@@ -262,13 +270,40 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 			break;
 		case REQUESTCODE_CUTTING:
 			if (data != null) {
-				setPicToView(data);
+				updateUserAvatar(data);
 			}
 			break;
 		default:
 			break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	private void updateUserAvatar(final Intent picData) {
+		dialog = ProgressDialog.show(this, getString(R.string.dl_update_photo), getString(R.string.dl_waiting));
+		dialog.show();
+		File file=saveBitmapFile(picData);
+		NetDao.updateAvatar(this, user.getMUserName(), file, new OkHttpUtils.OnCompleteListener<Result>() {
+			@Override
+			public void onSuccess(Result result) {
+				L.e(TAG,"result="+result);
+				if(result!=null&&result.isRetMsg()){
+					setPicToView(picData);
+					dialog.dismiss();
+				}else {
+                 dialog.dismiss();
+					Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_fail), Toast.LENGTH_SHORT).show();
+				}
+			}
+
+			@Override
+			public void onError(String error) {
+				L.e(TAG,"error="+error);
+				dialog.dismiss();
+				Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_fail), Toast.LENGTH_SHORT).show();
+			}
+		});
+
 	}
 
 	public void startPhotoZoom(Uri uri) {
@@ -301,9 +336,8 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 	}
 	
 	private void uploadUserAvatar(final byte[] data) {
-		dialog = ProgressDialog.show(this, getString(R.string.dl_update_photo), getString(R.string.dl_waiting));
-		new Thread(new Runnable() {
 
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				final String avatarUrl = SuperWeChatHelper.getInstance().getUserProfileManager().uploadUserAvatar(data);
@@ -325,7 +359,7 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 			}
 		}).start();
 
-		dialog.show();
+
 	}
 	
 	
@@ -333,5 +367,24 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
 		return baos.toByteArray();
+	}
+	public File saveBitmapFile(Intent picData){
+		Bundle extras = picData.getExtras();
+		if (extras != null) {
+			Bitmap bitmap=extras.getParcelable("data");
+			String imagepath= EaseImageUtils.getImagePath(user.getMUserName()+ I.AVATAR_SUFFIX_PNG);
+			File file=new File(imagepath);
+			L.e(TAG,"imagePath="+file.getAbsolutePath());
+			try {
+				BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file));
+				bitmap.compress(Bitmap.CompressFormat.PNG,100,bos);
+				bos.flush();
+				bos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return file;
+		}
+		return null;
 	}
 }
