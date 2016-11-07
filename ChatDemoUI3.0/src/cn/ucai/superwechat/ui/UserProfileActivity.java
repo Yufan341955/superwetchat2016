@@ -2,12 +2,16 @@ package cn.ucai.superwechat.ui;
 
 import java.io.ByteArrayOutputStream;
 
+import com.alipay.security.mobile.module.commonutils.CommonUtils;
 import com.bumptech.glide.Glide;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.utils.MFGT;
+
 import com.hyphenate.easeui.domain.EaseUser;
+import com.hyphenate.easeui.utils.EaseSmileUtils;
 import com.hyphenate.easeui.utils.EaseUserUtils;
 
 import android.app.AlertDialog;
@@ -26,6 +30,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,14 +39,15 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 	
 	private static final int REQUESTCODE_PICK = 1;
 	private static final int REQUESTCODE_CUTTING = 2;
-	private ImageView headAvatar;
-	private ImageView headPhotoUpdate;
-	private ImageView iconRightArrow;
+
 	private TextView tvNickName;
 	private TextView tvUsername;
 	private ProgressDialog dialog;
-	private RelativeLayout rlNickName;
-	
+
+	private ImageView mImgback,mImgAvatar;
+	private TextView mtvTitle;
+	private RelativeLayout mRlUserAvatar;
+	private LinearLayout mLNick,mLUserName;
 	
 	
 	@Override
@@ -53,52 +59,35 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 	}
 	
 	private void initView() {
-		headAvatar = (ImageView) findViewById(R.id.user_head_avatar);
-		headPhotoUpdate = (ImageView) findViewById(R.id.user_head_headphoto_update);
-		tvUsername = (TextView) findViewById(R.id.user_username);
-		tvNickName = (TextView) findViewById(R.id.user_nickname);
-		rlNickName = (RelativeLayout) findViewById(R.id.rl_nickname);
-		iconRightArrow = (ImageView) findViewById(R.id.ic_right_arrow);
+		mImgAvatar= (ImageView) findViewById(R.id.iv_profile_avatar);
+		tvUsername = (TextView) findViewById(R.id.tv_profile_weixinhao);
+		tvNickName = (TextView) findViewById(R.id.tv_profile_nickname);
+		mRlUserAvatar = (RelativeLayout) findViewById(R.id.layout_title);
+		mLNick= (LinearLayout) findViewById(R.id.layout_profile_nick);
+		mLUserName= (LinearLayout) findViewById(R.id.layout_weixinhao);
+		mImgback= (ImageView) findViewById(R.id.img_back);
+		mtvTitle= (TextView) findViewById(R.id.txt_title);
+		mImgback.setVisibility(View.VISIBLE);
+		mtvTitle.setVisibility(View.VISIBLE);
+		mtvTitle.setText(getString(R.string.title_user_profile));
 	}
 	
 	private void initListener() {
-		Intent intent = getIntent();
-		String username = intent.getStringExtra("username");
-		boolean enableUpdate = intent.getBooleanExtra("setting", false);
-		if (enableUpdate) {
-			headPhotoUpdate.setVisibility(View.VISIBLE);
-			iconRightArrow.setVisibility(View.VISIBLE);
-			rlNickName.setOnClickListener(this);
-			headAvatar.setOnClickListener(this);
-		} else {
-			headPhotoUpdate.setVisibility(View.GONE);
-			iconRightArrow.setVisibility(View.INVISIBLE);
-		}
-		if(username != null){
-//    		if (username.equals(EMClient.getInstance().getCurrentUser())) {
-//    			tvUsername.setText(EMClient.getInstance().getCurrentUser());
-//    			EaseUserUtils.setUserNick(username, tvNickName);
-//                EaseUserUtils.setUserAvatar(this, username, headAvatar);
-//    		} else {
-//    			tvUsername.setText(username);
-//    			EaseUserUtils.setUserNick(username, tvNickName);
-//    			EaseUserUtils.setUserAvatar(this, username, headAvatar);
-//    			asyncFetchUserInfo(username);
-//    		}
-			tvUsername.setText(username);
-			EaseUserUtils.setAppUserNick(username, tvNickName);
-			EaseUserUtils.setAppUserAvatar(this, username, headAvatar);
-
-		}
+		EaseUserUtils.setCurrentAppUserAvatar(this,mImgAvatar);
+		EaseUserUtils.setCurrentAppNick(tvNickName);
+		EaseUserUtils.setCurrentAppUserName(tvUsername);
+		mRlUserAvatar.setOnClickListener(this);
+		mLNick.setOnClickListener(this);
+		mLUserName.setOnClickListener(this);
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.user_head_avatar:
+		case R.id.layout_title:
 			uploadHeadPhoto();
 			break;
-		case R.id.rl_nickname:
+		case R.id.layout_profile_nick:
 			final EditText editText = new EditText(this);
 			new AlertDialog.Builder(this).setTitle(R.string.setting_nickname).setIcon(android.R.drawable.ic_dialog_info).setView(editText)
 					.setPositiveButton(R.string.dl_ok, new DialogInterface.OnClickListener() {
@@ -114,6 +103,13 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 						}
 					}).setNegativeButton(R.string.dl_cancel, null).show();
 			break;
+		case R.id.layout_weixinhao:
+			Toast.makeText(UserProfileActivity.this, R.string.User_name_cannot_be_modify, Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.img_back:
+			MFGT.finish(this);
+			break;
+
 		default:
 			break;
 		}
@@ -132,9 +128,9 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 				    }
 					tvNickName.setText(user.getNick());
 					if(!TextUtils.isEmpty(user.getAvatar())){
-						 Glide.with(UserProfileActivity.this).load(user.getAvatar()).placeholder(R.drawable.em_default_avatar).into(headAvatar);
+						 Glide.with(UserProfileActivity.this).load(user.getAvatar()).placeholder(R.drawable.default_hd_avatar).into(mImgAvatar);
 					}else{
-					    Glide.with(UserProfileActivity.this).load(R.drawable.em_default_avatar).into(headAvatar);
+					    Glide.with(UserProfileActivity.this).load(R.drawable.default_nor_avatar).into(mImgAvatar);
 					}
 				}
 			}
@@ -251,7 +247,7 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 		if (extras != null) {
 			Bitmap photo = extras.getParcelable("data");
 			Drawable drawable = new BitmapDrawable(getResources(), photo);
-			headAvatar.setImageDrawable(drawable);
+			mImgAvatar.setImageDrawable(drawable);
 			uploadUserAvatar(Bitmap2Bytes(photo));
 		}
 
