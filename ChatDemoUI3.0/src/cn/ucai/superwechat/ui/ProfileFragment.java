@@ -85,4 +85,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
             outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUserInfo();
+    }
 }

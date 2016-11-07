@@ -142,4 +142,5 @@
     <string name="MSG_999">msg_unknow</string>
     <string name="MSG_1">msg_illegal_request</string>
     <string name="User_name_cannot_be_modify">user_name_cannot_be_modify</string>
+    <string name="toast_nick_not_be_modify">nick_not_be_modify</string>
 </resources>

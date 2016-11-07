@@ -4,13 +4,20 @@ import java.io.ByteArrayOutputStream;
 
 import com.alipay.security.mobile.module.commonutils.CommonUtils;
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
+import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.MFGT;
+import cn.ucai.superwechat.utils.ResultUtils;
 
 import com.hyphenate.easeui.domain.EaseUser;
+import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.utils.EaseSmileUtils;
 import com.hyphenate.easeui.utils.EaseUserUtils;
 
@@ -23,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -36,7 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class UserProfileActivity extends BaseActivity implements OnClickListener{
-	
+	private static final String TAG=UserProfileActivity.class.getSimpleName();
 	private static final int REQUESTCODE_PICK = 1;
 	private static final int REQUESTCODE_CUTTING = 2;
 
@@ -48,14 +56,15 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 	private TextView mtvTitle;
 	private RelativeLayout mRlUserAvatar;
 	private LinearLayout mLNick,mLUserName;
-	
-	
+	private User user=null;
+
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
 		setContentView(R.layout.em_activity_user_profile);
 		initView();
 		initListener();
+		user = EaseUserUtils.getCurrentAppUserInfo();
 	}
 	
 	private void initView() {
@@ -79,6 +88,7 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 		mRlUserAvatar.setOnClickListener(this);
 		mLNick.setOnClickListener(this);
 		mLUserName.setOnClickListener(this);
+		mImgback.setOnClickListener(this);
 	}
 
 	@Override
@@ -89,14 +99,19 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 			break;
 		case R.id.layout_profile_nick:
 			final EditText editText = new EditText(this);
-			new AlertDialog.Builder(this).setTitle(R.string.setting_nickname).setIcon(android.R.drawable.ic_dialog_info).setView(editText)
+			editText.setText(user.getMUserNick());
+			new Builder(this).setTitle(R.string.setting_nickname).setIcon(android.R.drawable.ic_dialog_info).setView(editText)
 					.setPositiveButton(R.string.dl_ok, new DialogInterface.OnClickListener() {
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							String nickString = editText.getText().toString();
+							String nickString = editText.getText().toString().trim();
 							if (TextUtils.isEmpty(nickString)) {
 								Toast.makeText(UserProfileActivity.this, getString(R.string.toast_nick_not_isnull), Toast.LENGTH_SHORT).show();
+								return;
+							}
+							if(nickString.equals(user.getMUserNick())){
+								Toast.makeText(UserProfileActivity.this, getString(R.string.toast_nick_not_be_modify), Toast.LENGTH_SHORT).show();
 								return;
 							}
 							updateRemoteNick(nickString);
@@ -190,6 +205,7 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 						}
 					});
 				} else {
+					updateAppNick(nickName);
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -202,6 +218,37 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 				}
 			}
 		}).start();
+	}
+
+	private void updateAppNick(String nick) {
+		NetDao.updateNick(this, user.getMUserName(), nick, new OkHttpUtils.OnCompleteListener<Result>() {
+			@Override
+			public void onSuccess(Result result) {
+				  L.e(TAG,"result="+result);
+				  if(result!=null&&result.isRetMsg()){
+					  Gson gson=new Gson();
+					  String json=result.getRetData().toString();
+                        User u= gson.fromJson(json,User.class);
+					    updateLocatUser(u);
+				  }else {
+					  Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatenick_fail), Toast.LENGTH_SHORT).show();
+					  dialog.dismiss();
+				  }
+
+			}
+
+			@Override
+			public void onError(String error) {
+               L.e(TAG,"error="+error);
+				dialog.dismiss();
+			}
+		});
+	}
+
+	private void updateLocatUser(User u) {
+		user=u;
+		SuperWeChatHelper.getInstance().saveAppContact(u);
+		EaseUserUtils.setCurrentAppNick(tvNickName);
 	}
 
 	@Override

@@ -377,4 +377,5 @@
     <string name="MSG_999">未知错误</string>
     <string name="MSG_1">非法请求</string>
     <string name="User_name_cannot_be_modify">用户名不能被修改！</string>
+    <string name="toast_nick_not_be_modify">昵称为未改变！</string>
 </resources>
