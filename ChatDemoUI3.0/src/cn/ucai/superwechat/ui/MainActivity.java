@@ -28,6 +28,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -49,8 +50,11 @@ import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.adapter.MainTabAdpter;
 import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
+import cn.ucai.superwechat.dialog.TitleMenu.ActionItem;
+import cn.ucai.superwechat.dialog.TitleMenu.TitlePopup;
 import cn.ucai.superwechat.runtimepermissions.PermissionsManager;
 import cn.ucai.superwechat.runtimepermissions.PermissionsResultAction;
+import cn.ucai.superwechat.utils.MFGT;
 import cn.ucai.superwechat.widget.DMTabHost;
 import cn.ucai.superwechat.widget.MFViewPager;
 
@@ -62,7 +66,7 @@ import com.umeng.update.UmengUpdateAgent;
 import java.util.List;
 
 @SuppressLint("NewApi")
-public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedChangeListener,MFViewPager.OnPageChangeListener{
+public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedChangeListener,MFViewPager.OnPageChangeListener,View.OnClickListener{
 
   protected static final String TAG = "MainActivity";
 //	// textview for unread message count
@@ -84,6 +88,9 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 	private MFViewPager mViewPager;
     private DMTabHost mTabHost;
 	private MainTabAdpter mAdapter;
+	private TitlePopup mTitlePopup;
+
+
 	/**
 	 * check if current user account was remove
 	 */
@@ -126,6 +133,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 	private void setListener() {
 		mViewPager.setOnPageChangeListener(this);
 		mTabHost.setOnCheckedChangeListener(this);
+		mImgRight.setOnClickListener(this);
 	}
 
 	private void checkedAccount() {
@@ -213,6 +221,28 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 		mAdapter.addFragment(new ProfileFragment(),getString(R.string.me));
 		mAdapter.notifyDataSetChanged();
 		mTabHost.setChecked(0);
+
+		mTitlePopup=new TitlePopup(this, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		mTitlePopup.addAction(new ActionItem(this,R.string.menu_groupchat,R.drawable.icon_menu_group));
+		mTitlePopup.addAction(new ActionItem(this,R.string.menu_addfriend,R.drawable.icon_menu_addfriend));
+		mTitlePopup.addAction(new ActionItem(this,R.string.menu_qrcode,R.drawable.icon_menu_sao));
+		mTitlePopup.addAction(new ActionItem(this,R.string.menu_money,R.drawable.icon_menu_money));
+		mTitlePopup.setItemOnClickListener(new TitlePopup.OnItemOnClickListener() {
+			@Override
+			public void onItemClick(ActionItem item, int position) {
+				switch (position){
+					case 0:
+					break;
+					case 1:
+						MFGT.gotoAddFirend(MainActivity.this);
+					break;
+					case 2:
+					break;
+					case 3:
+					break;
+				}
+			}
+		});
 
 	}
 
@@ -363,6 +393,15 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 	@Override
 	public void onPageScrollStateChanged(int state) {
 
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()){
+			case R.id.img_right:
+				mTitlePopup.show(findViewById(R.id.title));
+				break;
+		}
 	}
 
 	public class MyContactListener implements EMContactListener {
