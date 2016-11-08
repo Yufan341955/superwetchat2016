@@ -273,6 +273,10 @@
             android:name=".ui.SettingsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide" />
+        <activity
+            android:name=".ui.FirendProfileActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide" />
 
         <!-- 红包相关Activity start -->
         <!-- 发红包 -->

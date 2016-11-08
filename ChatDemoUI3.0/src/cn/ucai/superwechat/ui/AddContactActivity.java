@@ -19,77 +19,117 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
+import cn.ucai.superwechat.utils.L;
+import cn.ucai.superwechat.utils.MFGT;
+
+import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.widget.EaseAlertDialog;
 
-public class AddContactActivity extends BaseActivity{
-	private EditText editText;
-	private RelativeLayout searchedUserLayout;
-	private TextView nameText;
-	private Button searchBtn;
+public class AddContactActivity extends BaseActivity implements View.OnClickListener{
+	private static final String TAG=AddContactActivity.class.getSimpleName();
+
+	private EditText mEtUserName;
 	private String toAddUsername;
 	private ProgressDialog progressDialog;
+	private ImageView mImgback;
+	private TextView tvTitle;
+	private TextView tvRight;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.em_activity_add_contact);
-		TextView mTextView = (TextView) findViewById(R.id.add_list_friends);
-		
-		editText = (EditText) findViewById(R.id.edit_note);
-		String strAdd = getResources().getString(R.string.add_friend);
-		mTextView.setText(strAdd);
+		mEtUserName = (EditText) findViewById(R.id.edit_note);
 		String strUserName = getResources().getString(R.string.user_name);
-		editText.setHint(strUserName);
-		searchedUserLayout = (RelativeLayout) findViewById(R.id.ll_user);
-		nameText = (TextView) findViewById(R.id.name);
-		searchBtn = (Button) findViewById(R.id.search);
+		mEtUserName.setHint(strUserName);
+
+		mImgback= (ImageView) findViewById(R.id.img_back);
+		tvTitle= (TextView) findViewById(R.id.txt_title);
+		tvRight= (TextView) findViewById(R.id.txt_right);
+		mImgback.setVisibility(View.VISIBLE);
+		tvTitle.setVisibility(View.VISIBLE);
+		tvRight.setVisibility(View.VISIBLE);
+		tvTitle.setText(getString(R.string.menu_addfriend));
+		tvRight.setText(getString(R.string.search));
+		tvRight.setOnClickListener(this);
+		mImgback.setOnClickListener(this);
 	}
 	
 	
 	/**
 	 * search contact
-	 * @param v
+	 *
 	 */
-	public void searchContact(View v) {
-		final String name = editText.getText().toString();
-		String saveText = searchBtn.getText().toString();
-		
-		if (getString(R.string.button_search).equals(saveText)) {
-			toAddUsername = name;
+	public void searchContact() {
+		final String name = mEtUserName.getText().toString();
+
+		toAddUsername = name;
 			if(TextUtils.isEmpty(name)) {
 				new EaseAlertDialog(this, R.string.Please_enter_a_username).show();
 				return;
 			}
-			
-			// TODO you can search the user from your app server here.
-			
-			//show the userame and add button if user exist
-			searchedUserLayout.setVisibility(View.VISIBLE);
-			nameText.setText(toAddUsername);
-			
-		} 
-	}	
-	
+		progressDialog = new ProgressDialog(this);
+		String stri = getResources().getString(R.string.addcontact_search);
+		progressDialog.setMessage(stri);
+		progressDialog.setCanceledOnTouchOutside(false);
+		progressDialog.show();
+
+        searchAppUser();
+	}
+
+	private void searchAppUser() {
+		NetDao.searchUser(this, toAddUsername, new OkHttpUtils.OnCompleteListener<Result>() {
+			@Override
+			public void onSuccess(Result result) {
+				L.e(TAG,"searchAppUser(),result="+result);
+				progressDialog.dismiss();
+				if(result!=null&&result.isRetMsg()){
+					Gson gson=new Gson();
+					String json=result.getRetData().toString();
+					User user=gson.fromJson(json,User.class);
+                   if(user!=null){
+                      MFGT.gotoFirendProfile(AddContactActivity.this,user);
+				   }
+				}else {
+					Toast.makeText(AddContactActivity.this, getString(R.string.search_user_fail), Toast.LENGTH_SHORT).show();
+					progressDialog.dismiss();
+				}
+			}
+
+			@Override
+			public void onError(String error) {
+                L.e(TAG,"error="+error);
+				Toast.makeText(AddContactActivity.this, getString(R.string.search_user_fail), Toast.LENGTH_SHORT).show();
+				progressDialog.dismiss();
+			}
+		});
+	}
+
 	/**
 	 *  add contact
 	 * @param view
 	 */
 	public void addContact(View view){
-		if(EMClient.getInstance().getCurrentUser().equals(nameText.getText().toString())){
+		if(EMClient.getInstance().getCurrentUser().equals(mEtUserName.getText().toString())){
 			new EaseAlertDialog(this, R.string.not_add_myself).show();
 			return;
 		}
 		
-		if(SuperWeChatHelper.getInstance().getContactList().containsKey(nameText.getText().toString())){
+		if(SuperWeChatHelper.getInstance().getContactList().containsKey(mEtUserName.getText().toString())){
 		    //let the user know the contact already in your contact list
-		    if(EMClient.getInstance().contactManager().getBlackListUsernames().contains(nameText.getText().toString())){
+		    if(EMClient.getInstance().contactManager().getBlackListUsernames().contains(mEtUserName.getText().toString())){
 		        new EaseAlertDialog(this, R.string.user_already_in_contactlist).show();
 		        return;
 		    }
@@ -97,11 +137,7 @@ public class AddContactActivity extends BaseActivity{
 			return;
 		}
 		
-		progressDialog = new ProgressDialog(this);
-		String stri = getResources().getString(R.string.Is_sending_a_request);
-		progressDialog.setMessage(stri);
-		progressDialog.setCanceledOnTouchOutside(false);
-		progressDialog.show();
+
 		
 		new Thread(new Runnable() {
 			public void run() {
@@ -132,5 +168,17 @@ public class AddContactActivity extends BaseActivity{
 	
 	public void back(View v) {
 		finish();
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()){
+			case R.id.img_back:
+				MFGT.finish(this);
+			break;
+			case R.id.txt_right:
+				searchContact();
+			break;
+		}
 	}
 }
