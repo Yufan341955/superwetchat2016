@@ -92,7 +92,7 @@ public class FirendProfileActivity extends BaseActivity implements View.OnClickL
                  MFGT.gotoAddFirend(this,user.getMUserName());
                 break;
             case R.id.m_Frient_Profile_SendMessage_Btn:
-
+                 MFGT.gotoChat(this,user.getMUserName());
                 break;
             case R.id.m_Frient_Profile_MP4e_Btn:
 
