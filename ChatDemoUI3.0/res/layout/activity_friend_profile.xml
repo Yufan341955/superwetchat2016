@@ -61,7 +61,7 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:visibility="gone"
+
         android:layout_marginTop="20dp"
         android:id="@+id/m_Frient_Profile_Add"
         android:layout_width="match_parent"
@@ -70,6 +70,7 @@
         <Button
             android:id="@+id/m_Frient_Profile_Add_Btn"
             android:layout_height="match_parent"
+            android:visibility="gone"
             android:background="@color/green"
             android:layout_width="match_parent"
             android:layout_marginLeft="10dp"
@@ -82,7 +83,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:visibility="gone"
+
         android:layout_marginTop="20dp"
         android:id="@+id/m_Frient_Profile_SendMessage"
         android:layout_width="match_parent"
@@ -95,6 +96,7 @@
             android:layout_width="match_parent"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:visibility="gone"
             android:text="发消息"
             android:textSize="20dp"
             android:textColor="#fff"
@@ -102,7 +104,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:visibility="gone"
+
         android:layout_marginTop="20dp"
         android:id="@+id/m_Frient_Profile_MP4"
         android:layout_width="match_parent"
@@ -115,6 +117,7 @@
             android:layout_width="match_parent"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:visibility="gone"
             android:text="视频聊天"
             android:textSize="20dp"
             android:textColor="@color/black"
