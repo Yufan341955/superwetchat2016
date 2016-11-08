@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.easemob.redpacketui.RedPacketConstant;
 import com.easemob.redpacketui.utils.RedPacketUtil;
+import com.google.gson.Gson;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMContactListener;
@@ -26,6 +27,9 @@ import com.hyphenate.chat.EMMessage.Type;
 import com.hyphenate.chat.EMOptions;
 import com.hyphenate.chat.EMTextMessageBody;
 
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
 import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
@@ -38,6 +42,7 @@ import cn.ucai.superwechat.ui.ChatActivity;
 import cn.ucai.superwechat.ui.MainActivity;
 import cn.ucai.superwechat.ui.VideoCallActivity;
 import cn.ucai.superwechat.ui.VoiceCallActivity;
+import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.PreferenceManager;
 import com.hyphenate.easeui.controller.EaseUI;
 import com.hyphenate.easeui.controller.EaseUI.EaseEmojiconInfoProvider;
@@ -608,6 +613,7 @@ public class SuperWeChatHelper {
 
         @Override
         public void onContactAdded(String username) {
+            L.e(TAG,"MyContactListener.onContactAdded...");
             // save contact
             Map<String, EaseUser> localUsers = getContactList();
             Map<String, EaseUser> toAddUsers = new HashMap<String, EaseUser>();
@@ -615,6 +621,27 @@ public class SuperWeChatHelper {
 
             if (!localUsers.containsKey(username)) {
                 userDao.saveContact(user);
+            }
+
+            Map<String, User> localAppUsers = getAppContactList();
+            if(!localAppUsers.containsKey(username)){
+                NetDao.addContact(appContext, EMClient.getInstance().getCurrentUser(), username, new OkHttpUtils.OnCompleteListener<Result>() {
+                    @Override
+                    public void onSuccess(Result result) {
+                        if(result!=null&&result.isRetMsg()){
+                            Gson gson=new Gson();
+                            String json=result.getRetData().toString();
+                            User user=gson.fromJson(json,User.class);
+                            saveAppContact(user);
+                            broadcastManager.sendBroadcast(new Intent(Constant.ACTION_CONTACT_CHANAGED));
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+
+                    }
+                });
             }
             toAddUsers.put(username, user);
             localUsers.putAll(toAddUsers);
@@ -624,6 +651,7 @@ public class SuperWeChatHelper {
 
         @Override
         public void onContactDeleted(String username) {
+            L.e(TAG,"MyContactListener.onContactDeleted...");
             Map<String, EaseUser> localUsers = SuperWeChatHelper.getInstance().getContactList();
             localUsers.remove(username);
             userDao.deleteContact(username);
@@ -655,6 +683,7 @@ public class SuperWeChatHelper {
 
         @Override
         public void onContactAgreed(String username) {
+            L.e(TAG,"MyContactListener.onContactAgreed...");
             List<InviteMessage> msgs = inviteMessgeDao.getMessagesList();
             for (InviteMessage inviteMessage : msgs) {
                 if (inviteMessage.getFrom().equals(username)) {
@@ -673,6 +702,7 @@ public class SuperWeChatHelper {
 
         @Override
         public void onContactRefused(String username) {
+            L.e(TAG,"MyContactListener.onContactRefused...");
             // your request was refused
             Log.d(username, username + " refused to your request");
         }
