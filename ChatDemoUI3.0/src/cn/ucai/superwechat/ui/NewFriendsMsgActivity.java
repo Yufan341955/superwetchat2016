@@ -15,12 +15,15 @@ package cn.ucai.superwechat.ui;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.adapter.NewFriendsMsgAdapter;
 import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.domain.InviteMessage;
+import cn.ucai.superwechat.utils.MFGT;
 
 import java.util.List;
 
@@ -29,13 +32,15 @@ import java.util.List;
  *
  */
 public class NewFriendsMsgActivity extends BaseActivity {
-
+     private ImageView mImgback;
+	 private TextView mtvTiltle;
+	 private ListView listView;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.em_activity_new_friends_msg);
+		initView();
 
-		ListView listView = (ListView) findViewById(R.id.list);
 		InviteMessgeDao dao = new InviteMessgeDao(this);
 		List<InviteMessage> msgs = dao.getMessagesList();
 
@@ -45,7 +50,20 @@ public class NewFriendsMsgActivity extends BaseActivity {
 		
 	}
 
-	public void back(View view) {
-		finish();
+	private void initView() {
+		mImgback= (ImageView) findViewById(R.id.img_back);
+		mtvTiltle= (TextView) findViewById(R.id.txt_title);
+		listView = (ListView) findViewById(R.id.list);
+		mImgback.setVisibility(View.VISIBLE);
+		mtvTiltle.setVisibility(View.VISIBLE);
+		mtvTiltle.setText(getString(R.string.recommended_friends));
+		mImgback.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				MFGT.finish(NewFriendsMsgActivity.this);
+			}
+		});
 	}
+
+
 }
