@@ -119,9 +119,9 @@ public class AddContactActivity extends BaseActivity implements View.OnClickList
 
 	/**
 	 *  add contact
-	 * @param view
+	 *
 	 */
-	public void addContact(View view){
+	public void addContact(){
 		if(EMClient.getInstance().getCurrentUser().equals(mEtUserName.getText().toString())){
 			new EaseAlertDialog(this, R.string.not_add_myself).show();
 			return;

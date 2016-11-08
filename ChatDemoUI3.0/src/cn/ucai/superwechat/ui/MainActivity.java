@@ -54,6 +54,7 @@ import cn.ucai.superwechat.dialog.TitleMenu.ActionItem;
 import cn.ucai.superwechat.dialog.TitleMenu.TitlePopup;
 import cn.ucai.superwechat.runtimepermissions.PermissionsManager;
 import cn.ucai.superwechat.runtimepermissions.PermissionsResultAction;
+import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.MFGT;
 import cn.ucai.superwechat.widget.DMTabHost;
 import cn.ucai.superwechat.widget.MFViewPager;
@@ -75,10 +76,10 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 //	private TextView unreadAddressLable;
 //
 //	private Button[] mTabs;
-//	private ContactListFragment contactListFragment;
+	private ContactListFragment contactListFragment;
 //	private Fragment[] fragments;
 //	private int index;
-//	private int currentTabIndex;
+private int currentTabIndex;
 	// user logged into another device
 	public boolean isConflict = false;
 	// user account was removed
@@ -105,6 +106,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 		checkLogined(savedInstanceState);
 		setContentView(R.layout.em_activity_main);
 		// runtime permission for android 6.0, just require all permissions here for simple
+		contactListFragment = new ContactListFragment();
 		requestPermissions();
 		initView();
 		umeng();
@@ -113,7 +115,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 		inviteMessgeDao = new InviteMessgeDao(this);
 		UserDao userDao = new UserDao(this);
 //		conversationListFragment = new ConversationListFragment();
-//		contactListFragment = new ContactListFragment();
+
 //		SettingsFragment settingFragment = new SettingsFragment();
 //		fragments = new Fragment[] { conversationListFragment, contactListFragment, settingFragment};
 //
@@ -216,10 +218,11 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 		mViewPager.setOffscreenPageLimit(4);
 		mAdapter.clear();
 		mAdapter.addFragment(new ConversationListFragment(),getString(R.string.app_name));
-		mAdapter.addFragment(new ContactListFragment(),getString(R.string.contacts));
+		mAdapter.addFragment(contactListFragment,getString(R.string.contacts));
 		mAdapter.addFragment(new DiscoverFragment(),getString(R.string.discover));
 		mAdapter.addFragment(new ProfileFragment(),getString(R.string.me));
 		mAdapter.notifyDataSetChanged();
+		currentTabIndex=0;
 		mTabHost.setChecked(0);
 
 		mTitlePopup=new TitlePopup(this, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -351,11 +354,12 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 //                    if (conversationListFragment != null) {
 //                        conversationListFragment.refresh();
 //                    }
-//                } else if (currentTabIndex == 1) {
-//                    if(contactListFragment != null) {
-//                        contactListFragment.refresh();
-//                    }
-//                }
+//                } else
+    if (currentTabIndex == 1) {
+                    if(contactListFragment != null) {
+                        contactListFragment.refresh();
+                    }
+                }
                 String action = intent.getAction();
                 if(action.equals(Constant.ACTION_GROUP_CHANAGED)){
                     if (EaseCommonUtils.getTopActivity(MainActivity.this).equals(GroupsActivity.class.getName())) {
@@ -377,6 +381,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 	@Override
 	public void onCheckedChange(int checkedPosition, boolean byUser) {
 		mViewPager.setCurrentItem(checkedPosition,false);
+		currentTabIndex=checkedPosition;
 
 	}
 
@@ -388,6 +393,8 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 	@Override
 	public void onPageSelected(int position) {
 		mTabHost.setChecked(position);
+		mViewPager.setCurrentItem(position);
+		currentTabIndex=position;
 	}
 
 	@Override
@@ -470,11 +477,12 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 		runOnUiThread(new Runnable() {
 			public void run() {
 				int count = getUnreadAddressCountTotal();
-//				if (count > 0) {
-//					unreadAddressLable.setVisibility(View.VISIBLE);
-//				} else {
-//					unreadAddressLable.setVisibility(View.INVISIBLE);
-//				}
+				L.e(TAG,"updateUnreadAddressLable,count="+count);
+				if (count > 0) {
+					mTabHost.setHasNew(1,true);
+				} else {
+					mTabHost.setHasNew(1,false);
+				}
 			}
 		});
 
