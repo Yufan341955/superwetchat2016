@@ -39,6 +39,7 @@ public class AddFriendActivity extends BaseActivity implements View.OnClickListe
 
     private void setListener() {
         mbtnSend.setOnClickListener(this);
+        mImgback.setOnClickListener(this);
     }
 
     private void initView() {
@@ -57,6 +58,9 @@ public class AddFriendActivity extends BaseActivity implements View.OnClickListe
             case R.id.btn_send:
                 sendMessage();
             break;
+            case R.id.img_back:
+                MFGT.finish(this);
+                break;
         }
     }
 
