@@ -20,6 +20,9 @@ import com.hyphenate.chat.EMClient;
 import cn.ucai.superwechat.SuperWeChatHelper;
 
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
 import cn.ucai.superwechat.utils.MFGT;
@@ -228,7 +231,8 @@ public class ContactListFragment extends EaseContactListFragment {
             }
 			return true;
 		}
-		return super.onContextItemSelected(item);
+        return false;
+		//return super.onContextItemSelected(item);
 	}
 
 
@@ -244,6 +248,20 @@ public class ContactListFragment extends EaseContactListFragment {
 		pd.setMessage(st1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
+        NetDao.deleteContact(getContext(), EMClient.getInstance().getCurrentUser(), tobeDeleteUser.getUsername(), new OkHttpUtils.OnCompleteListener<Result>() {
+            @Override
+            public void onSuccess(Result result) {
+                if(result!=null&&result.isRetMsg()){
+                    SuperWeChatHelper.getInstance().deleteAppContact(tobeDeleteUser.getUsername());
+                    contactListLayout.refresh();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
 		new Thread(new Runnable() {
 			public void run() {
 				try {

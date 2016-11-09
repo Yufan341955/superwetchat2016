@@ -91,6 +91,14 @@ private int currentTabIndex;
 	private MainTabAdpter mAdapter;
 	private TitlePopup mTitlePopup;
 
+	private android.app.AlertDialog.Builder conflictBuilder;
+	private android.app.AlertDialog.Builder accountRemovedBuilder;
+	private boolean isConflictDialogShow;
+	private boolean isAccountRemovedDialogShow;
+	private BroadcastReceiver internalDebugReceiver;
+	private ConversationListFragment conversationListFragment;
+	private BroadcastReceiver broadcastReceiver;
+	private LocalBroadcastManager broadcastManager;
 
 	/**
 	 * check if current user account was remove
@@ -106,6 +114,7 @@ private int currentTabIndex;
 		checkLogined(savedInstanceState);
 		setContentView(R.layout.em_activity_main);
 		// runtime permission for android 6.0, just require all permissions here for simple
+		conversationListFragment = new ConversationListFragment();
 		contactListFragment = new ContactListFragment();
 		requestPermissions();
 		initView();
@@ -114,7 +123,7 @@ private int currentTabIndex;
         setListener();
 		inviteMessgeDao = new InviteMessgeDao(this);
 		UserDao userDao = new UserDao(this);
-//		conversationListFragment = new ConversationListFragment();
+
 
 //		SettingsFragment settingFragment = new SettingsFragment();
 //		fragments = new Fragment[] { conversationListFragment, contactListFragment, settingFragment};
@@ -217,7 +226,7 @@ private int currentTabIndex;
 		mViewPager.setAdapter(mAdapter);
 		mViewPager.setOffscreenPageLimit(4);
 		mAdapter.clear();
-		mAdapter.addFragment(new ConversationListFragment(),getString(R.string.app_name));
+		mAdapter.addFragment(conversationListFragment,getString(R.string.app_name));
 		mAdapter.addFragment(contactListFragment,getString(R.string.contacts));
 		mAdapter.addFragment(new DiscoverFragment(),getString(R.string.discover));
 		mAdapter.addFragment(new ProfileFragment(),getString(R.string.me));
@@ -322,12 +331,12 @@ private int currentTabIndex;
 			public void run() {
 				// refresh unread count
 				updateUnreadLabel();
-//				if (currentTabIndex == 0) {
-//					// refresh conversation list
-//					if (conversationListFragment != null) {
-//						conversationListFragment.refresh();
-//					}
-//				}
+				if (currentTabIndex == 0) {
+					// refresh conversation list
+					if (conversationListFragment != null) {
+						conversationListFragment.refresh();
+					}
+				}
 			}
 		});
 	}
@@ -349,13 +358,12 @@ private int currentTabIndex;
             public void onReceive(Context context, Intent intent) {
                 updateUnreadLabel();
                 updateUnreadAddressLable();
-//                if (currentTabIndex == 0) {
-//                    // refresh conversation list
-//                    if (conversationListFragment != null) {
-//                        conversationListFragment.refresh();
-//                    }
-//                } else
-    if (currentTabIndex == 1) {
+                if (currentTabIndex == 0) {
+                    // refresh conversation list
+                    if (conversationListFragment != null) {
+                        conversationListFragment.refresh();
+                    }
+                } else if (currentTabIndex == 1) {
                     if(contactListFragment != null) {
                         contactListFragment.refresh();
                     }
@@ -559,14 +567,7 @@ private int currentTabIndex;
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private android.app.AlertDialog.Builder conflictBuilder;
-	private android.app.AlertDialog.Builder accountRemovedBuilder;
-	private boolean isConflictDialogShow;
-	private boolean isAccountRemovedDialogShow;
-    private BroadcastReceiver internalDebugReceiver;
-    private ConversationListFragment conversationListFragment;
-    private BroadcastReceiver broadcastReceiver;
-    private LocalBroadcastManager broadcastManager;
+
 
 	/**
 	 * show the dialog when user logged into another device

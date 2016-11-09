@@ -42,6 +42,7 @@ public class FirendProfileActivity extends BaseActivity implements View.OnClickL
         user = (User) getIntent().getSerializableExtra(I.User.USER_NAME);
         if(user==null){
           MFGT.finish(this);
+            return;
         }
         initView();
 
