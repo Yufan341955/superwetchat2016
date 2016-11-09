@@ -359,8 +359,8 @@ private int currentTabIndex;
             public void onReceive(Context context, Intent intent) {
                 updateUnreadLabel();
                 updateUnreadAddressLable();
-                //if (currentTabIndex == 0) {
-                    // refresh conversation list
+//                if (currentTabIndex == 0) {
+//                     refresh conversation list
                     if (conversationListFragment != null) {
                         conversationListFragment.refresh();
                    }
@@ -471,12 +471,7 @@ private int currentTabIndex;
 	 */
 	public void updateUnreadLabel() {
 		int count = getUnreadMsgCountTotal();
-//		if (count > 0) {
-//			unreadLabel.setText(String.valueOf(count));
-//			unreadLabel.setVisibility(View.VISIBLE);
-//		} else {
-//			unreadLabel.setVisibility(View.INVISIBLE);
-//		}
+		mTabHost.setUnreadCount(0,count);
 	}
 
 	/**
@@ -655,6 +650,7 @@ private int currentTabIndex;
 		L.e(TAG,"extra="+extra);
 		if(extra){
 			mTabHost.setChecked(0);
+			//updateUnreadLabel();
 		}
 	}
 	

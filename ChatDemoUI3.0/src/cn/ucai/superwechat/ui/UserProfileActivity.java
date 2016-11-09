@@ -337,7 +337,7 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
 			dialog.dismiss();
 			Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_success),
 					Toast.LENGTH_SHORT).show();
-			//uploadUserAvatar(Bitmap2Bytes(photo));
+			uploadUserAvatar(Bitmap2Bytes(photo));
 		}
 
 	}
