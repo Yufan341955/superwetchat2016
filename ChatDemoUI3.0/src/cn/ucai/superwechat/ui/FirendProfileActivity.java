@@ -1,11 +1,14 @@
 package cn.ucai.superwechat.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.hyphenate.chat.EMClient;
 import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.utils.EaseUserUtils;
 
@@ -96,7 +99,13 @@ public class FirendProfileActivity extends BaseActivity implements View.OnClickL
                  MFGT.gotoChat(this,user.getMUserName());
                 break;
             case R.id.m_Frient_Profile_MP4e_Btn:
+                  if(!EMClient.getInstance().isConnected()){
+                      Toast.makeText(FirendProfileActivity.this, R.string.not_connect_to_server, Toast.LENGTH_SHORT).show();
+                  }else {
+                     startActivity(new Intent(this,VideoCallActivity.class).putExtra("username",user.getMUserName())
+                             .putExtra("isComingCall",false));
 
+                  }
                 break;
         }
     }
