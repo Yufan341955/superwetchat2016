@@ -28,6 +28,7 @@ import com.hyphenate.chat.EMOptions;
 import com.hyphenate.chat.EMTextMessageBody;
 
 import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.ConvertUtils;
 import cn.ucai.superwechat.data.NetDao;
 import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
@@ -1114,6 +1115,38 @@ public class SuperWeChatHelper {
        }
        
        isSyncingContactsWithServer = true;
+       NetDao.downloadContact(appContext, EMClient.getInstance().getCurrentUser(), new OkHttpUtils.OnCompleteListener<Result>() {
+           @Override
+           public void onSuccess(Result result) {
+               if(result!=null&&result.isRetMsg()) {
+                   String json = result.getRetData().toString();
+                   Gson gson=new Gson();
+                   User[] users=gson.fromJson(json,User[].class);
+                   ArrayList<User> list= ConvertUtils.array2List(users);
+                   L.e(TAG,"list="+list.toString());
+                   if (list!=null&&list.size()>0) {
+                       L.e(TAG, "list.size=" + list.size());
+                       Map<String, User> usermap = new HashMap<String, User>();
+
+                       for (User user:list) {
+                           EaseCommonUtils.setAppUserInitialLetter(user);
+                           usermap.put(user.getMUserName(), user);
+                       }
+                       getAppContactList().clear();
+                       getAppContactList().putAll(usermap);
+                       UserDao dao = new UserDao(appContext);
+                       List<User> userlist = new ArrayList<User>(usermap.values());
+                       dao.saveAppContactList(userlist);
+                       broadcastManager.sendBroadcast(new Intent(Constant.ACTION_CONTACT_CHANAGED));
+                   }
+               }
+           }
+
+           @Override
+           public void onError(String error) {
+
+           }
+       });
        
        new Thread(){
            @Override

@@ -86,4 +86,11 @@ public class NetDao {
                 .targetClass(Result.class)
                 .execute(listener);
     }
+    public static void downloadContact(Context context, String username, OkHttpUtils.OnCompleteListener<Result> listener){
+        OkHttpUtils<Result> utils=new OkHttpUtils<Result>(context);
+        utils.setRequestUrl(I.REQUEST_DOWNLOAD_CONTACT_ALL_LIST)
+                .addParam(I.Contact.USER_NAME,username)
+                .targetClass(Result.class)
+                .execute(listener);
+    }
 }
