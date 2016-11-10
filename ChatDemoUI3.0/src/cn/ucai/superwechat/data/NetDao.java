@@ -2,6 +2,8 @@ package cn.ucai.superwechat.data;
 
 import android.content.Context;
 
+import com.hyphenate.chat.EMGroup;
+
 import java.io.File;
 
 import cn.ucai.superwechat.I;
@@ -90,6 +92,33 @@ public class NetDao {
         OkHttpUtils<Result> utils=new OkHttpUtils<Result>(context);
         utils.setRequestUrl(I.REQUEST_DOWNLOAD_CONTACT_ALL_LIST)
                 .addParam(I.Contact.USER_NAME,username)
+                .targetClass(Result.class)
+                .execute(listener);
+    }
+    public static void createGroup(Context context, EMGroup emGroup, File file, OkHttpUtils.OnCompleteListener<Result> listener){
+        OkHttpUtils<Result> utils=new OkHttpUtils<Result>(context);
+        utils.setRequestUrl(I.REQUEST_CREATE_GROUP)
+                .addParam(I.Group.HX_ID,emGroup.getGroupId())
+                .addParam(I.Group.NAME,emGroup.getGroupName())
+                .addParam(I.Group.DESCRIPTION,emGroup.getDescription())
+                .addParam(I.Group.OWNER,emGroup.getOwner())
+                .addParam(I.Group.IS_PUBLIC,String.valueOf(emGroup.isPublic()))
+                .addParam(I.Group.ALLOW_INVITES,String.valueOf(emGroup.isAllowInvites()))
+                .addFile2(file)
+                .post()
+                .targetClass(Result.class)
+                .execute(listener);
+    }
+    public static void createGroup(Context context, EMGroup emGroup, OkHttpUtils.OnCompleteListener<Result> listener){
+        OkHttpUtils<Result> utils=new OkHttpUtils<Result>(context);
+        utils.setRequestUrl(I.REQUEST_CREATE_GROUP)
+                .addParam(I.Group.HX_ID,emGroup.getGroupId())
+                .addParam(I.Group.NAME,emGroup.getGroupName())
+                .addParam(I.Group.DESCRIPTION,emGroup.getDescription())
+                .addParam(I.Group.OWNER,emGroup.getOwner())
+                .addParam(I.Group.IS_PUBLIC,String.valueOf(emGroup.isPublic()))
+                .addParam(I.Group.ALLOW_INVITES,String.valueOf(emGroup.isAllowInvites()))
+                .post()
                 .targetClass(Result.class)
                 .execute(listener);
     }
