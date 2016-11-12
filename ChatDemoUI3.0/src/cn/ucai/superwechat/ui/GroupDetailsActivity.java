@@ -22,6 +22,8 @@ import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMConversation.EMConversationType;
 import com.hyphenate.chat.EMGroup;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.utils.MFGT;
+
 import com.hyphenate.easeui.utils.EaseUserUtils;
 import com.hyphenate.easeui.widget.EaseAlertDialog;
 import com.hyphenate.easeui.widget.EaseAlertDialog.AlertDialogUser;
@@ -608,8 +610,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 //				Drawable avatar = getResources().getDrawable(R.drawable.default_avatar);
 //				avatar.setBounds(0, 0, referenceWidth, referenceHeight);
 //				button.setCompoundDrawables(null, avatar, null, null);
-				EaseUserUtils.setUserNick(username, holder.textView);
-				EaseUserUtils.setUserAvatar(getContext(), username, holder.imageView);
+				EaseUserUtils.setAppUserNick(username, holder.textView);
+				EaseUserUtils.setAppUserAvatar(getContext(), username, holder.imageView);
 				if (isInDeleteMode) {
 					// 如果是删除模式下，显示减人图标
 					convertView.findViewById(R.id.badge_delete).setVisibility(View.VISIBLE);
@@ -637,10 +639,10 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 							deleteMembersFromGroup(username);
 						} else {
 							// 正常情况下点击user，可以进入用户详情或者聊天页面等等
-							// startActivity(new
-							// Intent(GroupDetailsActivity.this,
-							// ChatActivity.class).putExtra("userId",
-							// user.getUsername()));
+//							 startActivity(new
+//							 Intent(GroupDetailsActivity.this,
+//							 ChatActivity.class).putExtra("userId", user.getUsername()));
+							MFGT.gotoChat(GroupDetailsActivity.this,username);
 
 						}
 					}

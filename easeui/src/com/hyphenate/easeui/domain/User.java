@@ -93,7 +93,7 @@ public class User implements Serializable {
 	}
 
 	public String getMAvatarSuffix() {
-		return mavatarSuffix;
+		return mavatarSuffix==null?".jpg":mavatarSuffix;
 	}
 
 //	public String getInitialLetter() {
