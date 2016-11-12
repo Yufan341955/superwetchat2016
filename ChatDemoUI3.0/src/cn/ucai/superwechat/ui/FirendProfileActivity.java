@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.utils.EaseUserUtils;
@@ -17,6 +18,9 @@ import java.io.Serializable;
 import cn.ucai.superwechat.I;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.SuperWeChatHelper;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.MFGT;
 
@@ -35,20 +39,61 @@ public class FirendProfileActivity extends BaseActivity implements View.OnClickL
     private Button mbtnAddFriend;
     private Button mbtnSendMSG;
     private Button mbtnSendVdeio;
-    User user;
-
+    User user=null;
+    String username=null;
+   boolean isFirend=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_profile);
-        user = (User) getIntent().getSerializableExtra(I.User.USER_NAME);
-        if(user==null){
-          MFGT.finish(this);
-            return;
+        username = getIntent().getStringExtra(I.User.USER_NAME);
+        if(username==null){
+            syncFail();
         }
+        user=SuperWeChatHelper.getInstance().getAppContactList().get(username);
+        if(user==null){
+            isFirend=false;
+        }else {
+            initView();
+            isFirend=true;
+        }
+        isFirend(isFirend);
+        syncUserInfo();
         initView();
 
+    }
+    private void syncFail(){
+        if(!isFirend) {
+            MFGT.finish(this);
+            return;
+        }
+    }
+    private void syncUserInfo() {
+        NetDao.searchUser(this, username, new OkHttpUtils.OnCompleteListener<Result>() {
+            @Override
+            public void onSuccess(Result result) {
+                if(result!=null&&result.isRetMsg()){
+                    Gson gson=new Gson();
+                    String json=result.getRetData().toString();
+                   User u=gson.fromJson(json,User.class);
+                    if(u!=null){
+                        if(isFirend){
+                            SuperWeChatHelper.getInstance().saveAppContact(u);
+                        }
+                        user=u;
+                        setUserInfo();
+                    }
+                }else {
+                    syncFail();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                syncFail();
+            }
+        });
     }
 
 
@@ -65,7 +110,6 @@ public class FirendProfileActivity extends BaseActivity implements View.OnClickL
         mbtnSendMSG = (Button) findViewById(R.id.m_Frient_Profile_SendMessage_Btn);
         mbtnSendVdeio = (Button) findViewById(R.id.m_Frient_Profile_MP4e_Btn);
         setUserInfo();
-        isFirend();
         setListener();
 
     }
@@ -110,8 +154,8 @@ public class FirendProfileActivity extends BaseActivity implements View.OnClickL
         }
     }
 
-    private void isFirend() {
-        if(SuperWeChatHelper.getInstance().getAppContactList().containsKey(user.getMUserName())){
+    private void isFirend(boolean isfirend) {
+        if(isfirend){
             mbtnSendMSG.setVisibility(View.VISIBLE);
             mbtnSendVdeio.setVisibility(View.VISIBLE);
         }else {

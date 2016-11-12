@@ -61,10 +61,10 @@ public class MFGT {
     public static void gotoAddFirend(Activity context){
         startActivity(context, AddContactActivity.class);
     }
-    public static void gotoFirendProfile(Activity context, User user){
+    public static void gotoFirendProfile(Activity context, String username){
          Intent intent=new Intent();
         intent.setClass(context, FirendProfileActivity.class);
-        intent.putExtra(I.User.USER_NAME,user);
+        intent.putExtra(I.User.USER_NAME,username);
         startActivity(context,intent);
     }
     public static void gotoAddFirend(Activity context, String username){

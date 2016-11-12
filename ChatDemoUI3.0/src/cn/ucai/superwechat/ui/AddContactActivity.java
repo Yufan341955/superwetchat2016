@@ -100,7 +100,7 @@ public class AddContactActivity extends BaseActivity implements View.OnClickList
 					String json=result.getRetData().toString();
 					User user=gson.fromJson(json,User.class);
                    if(user!=null){
-                      MFGT.gotoFirendProfile(AddContactActivity.this,user);
+                      MFGT.gotoFirendProfile(AddContactActivity.this,user.getMUserName());
 				   }
 				}else {
 					Toast.makeText(AddContactActivity.this, getString(R.string.search_user_fail), Toast.LENGTH_SHORT).show();
