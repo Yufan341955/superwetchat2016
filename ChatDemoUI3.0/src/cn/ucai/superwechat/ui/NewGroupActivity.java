@@ -47,6 +47,7 @@ import cn.ucai.superwechat.bean.Result;
 import cn.ucai.superwechat.data.NetDao;
 import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.utils.L;
+import cn.ucai.superwechat.utils.ResultUtils;
 
 import com.hyphenate.easeui.domain.Group;
 import com.hyphenate.easeui.utils.EaseImageUtils;
@@ -72,7 +73,7 @@ public class NewGroupActivity extends BaseActivity {
 	private LinearLayout mLayout;
 	private ImageView mIvGroupAvatar;
 	private File Avatarfile=null;
-
+	EMGroup emGroup;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -176,8 +177,8 @@ public class NewGroupActivity extends BaseActivity {
 					}else{
 						option.style = mcbMermber.isChecked()?EMGroupStyle.EMGroupStylePrivateMemberCanInvite:EMGroupStyle.EMGroupStylePrivateOnlyOwnerInvite;
 					}
-					EMGroup Group = EMClient.getInstance().groupManager().createGroup(groupName, desc, members, reason, option);
-					createAppGroup(Group);
+					emGroup = EMClient.getInstance().groupManager().createGroup(groupName, desc, members, reason, option);
+					createAppGroup();
 
 				} catch (final HyphenateException e) {
 					runOnUiThread(new Runnable() {
@@ -201,44 +202,63 @@ public class NewGroupActivity extends BaseActivity {
 			 }
 		 });
 	 }
-	private void createAppGroup(EMGroup group) {
+	private void
+	createAppGroup() {
 		if(Avatarfile==null){
-            NetDao.createGroup(this, group, new OkHttpUtils.OnCompleteListener<Result>() {
-				@Override
-				public void onSuccess(Result result) {
-					aftercreateGroup(result);
-				}
-
-				@Override
-				public void onError(String error) {
-					Toast.makeText(NewGroupActivity.this, error, Toast.LENGTH_SHORT).show();
-				}
-			});
+            NetDao.createGroup(this, emGroup,listener);
 		}else {
-			NetDao.createGroup(this, group, Avatarfile,new OkHttpUtils.OnCompleteListener<Result>() {
-				@Override
-				public void onSuccess(Result result) {
-					aftercreateGroup(result);
-				}
-
-				@Override
-				public void onError(String error) {
-					Toast.makeText(NewGroupActivity.this, error, Toast.LENGTH_SHORT).show();
-				}
-			});
+			NetDao.createGroup(this, emGroup, Avatarfile,listener);
 		}
 	}
+     OkHttpUtils.OnCompleteListener<Result> listener=new OkHttpUtils.OnCompleteListener<Result>() {
+		 @Override
+		 public void onSuccess(Result result) {
+			 if(result!=null&&result.isRetMsg()){
+				 String json=result.getRetData().toString();
+				 Gson gson=new Gson();
+				 Group group=gson.fromJson(json,Group.class);
+				 L.e(TAG,"group="+group.toString());
+				 if(emGroup!=null&&emGroup.getMembers()!=null&&emGroup.getMembers().size()>1){
+                    addGroupMembers();
+				 }else {
+					 createGroupSuccess();
+				 }
+			 }else {
+				 progressDialog.dismiss();
+				 Toast.makeText(NewGroupActivity.this,"创建群组失败！", Toast.LENGTH_SHORT).show();
+			 }
+		 }
 
-	private void aftercreateGroup(Result result) {
-		if(result!=null&&result.isRetMsg()){
-			String json=result.getRetData().toString();
-			Gson gson=new Gson();
-			Group group=gson.fromJson(json,Group.class);
-			L.e(TAG,"group="+group.toString());
-			createGroupSuccess();
-		}else {
-			Toast.makeText(NewGroupActivity.this,"创建群组失败！", Toast.LENGTH_SHORT).show();
-		}
+		 @Override
+		 public void onError(String error) {
+			 Toast.makeText(NewGroupActivity.this,"创建群组失败！", Toast.LENGTH_SHORT).show();
+		 }
+	 };
+
+	private void addGroupMembers() {
+		NetDao.addGroupMembers(this, emGroup, new OkHttpUtils.OnCompleteListener<String>() {
+			@Override
+			public void onSuccess(String s) {
+				if(s!=null){
+					Result result= ResultUtils.getResultFromJson(s,Group.class);
+					if(result!=null&&result.isRetMsg()){
+						createGroupSuccess();
+					}else {
+						progressDialog.dismiss();
+						Toast.makeText(NewGroupActivity.this,"创建群组失败！", Toast.LENGTH_SHORT).show();
+					}
+				}else {
+					progressDialog.dismiss();
+					Toast.makeText(NewGroupActivity.this,"创建群组失败！", Toast.LENGTH_SHORT).show();
+				}
+			}
+
+			@Override
+			public void onError(String error) {
+				progressDialog.dismiss();
+				Toast.makeText(NewGroupActivity.this,"创建群组失败！", Toast.LENGTH_SHORT).show();
+			}
+		});
 	}
 
 	public void back(View view) {

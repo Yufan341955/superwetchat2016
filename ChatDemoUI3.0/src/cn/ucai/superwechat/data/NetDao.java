@@ -2,6 +2,7 @@ package cn.ucai.superwechat.data;
 
 import android.content.Context;
 
+import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMGroup;
 
 import java.io.File;
@@ -120,6 +121,22 @@ public class NetDao {
                 .addParam(I.Group.ALLOW_INVITES,String.valueOf(emGroup.isAllowInvites()))
                 .post()
                 .targetClass(Result.class)
+                .execute(listener);
+    }
+
+    public static void addGroupMembers(Context context, EMGroup emGroup, OkHttpUtils.OnCompleteListener<String> listener){
+        String members="";
+        for(String m:emGroup.getMembers()){
+            if(!m.equals(EMClient.getInstance().getCurrentUser())){
+                members+=m+",";
+            }
+        }
+        members=members.substring(0,members.length()-1);
+        OkHttpUtils<String> utils=new OkHttpUtils<String>(context);
+        utils.setRequestUrl(I.REQUEST_ADD_GROUP_MEMBERS)
+                .addParam(I.Member.GROUP_HX_ID,emGroup.getGroupId())
+                .addParam(I.Member.USER_NAME,members)
+                .targetClass(String.class)
                 .execute(listener);
     }
 }
