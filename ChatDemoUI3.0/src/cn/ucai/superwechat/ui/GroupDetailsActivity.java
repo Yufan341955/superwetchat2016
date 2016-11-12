@@ -22,6 +22,8 @@ import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMConversation.EMConversationType;
 import com.hyphenate.chat.EMGroup;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.utils.MFGT;
 
 import com.hyphenate.easeui.utils.EaseUserUtils;
@@ -71,7 +73,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	private ProgressDialog progressDialog;
 
 	public static GroupDetailsActivity instance;
-	
+	ProgressDialog deleteDialog=null;
 	String st = "";
 
 	private EaseSwitchButton switchButton;
@@ -309,7 +311,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	/**
 	 * 退出群组
 	 * 
-	 * @param groupId
+	 *
 	 */
 	private void exitGrop() {
 		String st1 = getResources().getString(R.string.Exit_the_group_chat_failure);
@@ -341,7 +343,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	/**
 	 * 解散群组
 	 * 
-	 * @param groupId
+	 *
 	 */
 	private void deleteGrop() {
 		final String st5 = getResources().getString(R.string.Dissolve_group_chat_tofail);
@@ -653,7 +655,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					 * @param username
 					 */
 					protected void deleteMembersFromGroup(final String username) {
-						final ProgressDialog deleteDialog = new ProgressDialog(GroupDetailsActivity.this);
+						deleteDialog = new ProgressDialog(GroupDetailsActivity.this);
 						deleteDialog.setMessage(st13);
 						deleteDialog.setCanceledOnTouchOutside(false);
 						deleteDialog.show();
@@ -665,16 +667,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 									// 删除被选中的成员
 								    EMClient.getInstance().groupManager().removeUserFromGroup(groupId, username);
 									isInDeleteMode = false;
-									runOnUiThread(new Runnable() {
-
-										@Override
-										public void run() {
-											deleteDialog.dismiss();
-											refreshMembers();
-											((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "("
-													+ group.getAffiliationsCount() + st);
-										}
-									});
+									deleteMembers(username);
 								} catch (final Exception e) {
 									deleteDialog.dismiss();
 									runOnUiThread(new Runnable() {
@@ -720,6 +713,31 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		}
 	}
 
+	private void deleteMembers(String username) {
+		NetDao.deleteMembers(this, groupId, username, new OkHttpUtils.OnCompleteListener<String>() {
+			@Override
+			public void onSuccess(String result) {
+
+			}
+
+			@Override
+			public void onError(String error) {
+
+			}
+		});
+	}
+    private void afterdelteSuccess(){
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				deleteDialog.dismiss();
+				refreshMembers();
+				((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "("
+						+ group.getAffiliationsCount() + st);
+			}
+		});
+	}
 	protected void updateGroup() {
 		new Thread(new Runnable() {
 			public void run() {
